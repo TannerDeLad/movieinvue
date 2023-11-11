@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Ticket Time</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Name: Tanner Ladouceur
+        Class: Web Dev II - Markley
+        Project: Movie Final in Vue -->
+</head>
+
+<body>
+    <div id="mounter">
+        <header>
+            <h1>Movie House - Your source for upcoming movies</h1>
+        </header>
+        <!-- creating the div that will hold all of the movie cards -->
+        <div class="moviedisplay">
+            <!-- for every movie added to the movies array passed from the axios call, on the vue app, we are creating a card. we are binding the props for each of the cards to the movie instance "movie". we are also adding a listener for 'added' that when heard will trigger the addtocart method, which will add the movie to the cart array in app.js-->
+            <card v-for="movie in movies" v-bind:movobj="movie" v-on:added="addtocart($event)"></card>
+        </div>
+        <!-- if the amount of total tickets bought is greater than 0, then display this div. the div is ticket summary area -->
+        <div v-if="tot_tick > 0" class="cartarea">
+            <h1>Cart:</h1>
+            <!-- a table to organize the ticket summaries -->
+            <table class="table table-dark table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Movie</th>
+                        <th scope="col">Adult Tickets</th>
+                        <th scope="col">Child Tickets</th>
+                        <th scope="col">Subtotal</th>
+                        <th scope="col">Remove Button</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- iterating through the objects in the cart, also pairing the index of the cart item as index so we can later identify which item in the cart is which -->
+                    <tr v-for="(item, index) in cart" :key="index">
+                        <th>{{item.title}}</th>
+                        <td>
+                            <!-- the button that will decrement the amount of adult tickets. -->
+                            <div class="position-relative"><button v-on:click="cart_click_adult(item, index)"
+                                    v-if="item.adult>0" class="btn btn-primary position-relative">{{item.adult}} <span
+                                        v-if="item.adult>0" class="badge rounded-pill text-bg-danger">-</span></button>
+                            </div>
+                        </td>
+                        <td>
+                            <!-- button that will decrement the amount of child tickets -->
+                            <div class="position-relative"><button v-on:click="cart_click_child(item, index)"
+                                    v-if="item.child>0" class="btn btn-primary position-relative">{{item.child}} <span
+                                        v-if="item.child>0" class="badge rounded-pill text-bg-danger">-</span></button>
+                            </div>
+                        </td>
+                        <!-- a few td elements to determine which one to display. this is needed because sometimes item.child or item.adult will evaluate to null and cannot be compared with 0-->
+                        <td v-if="item.child > 0 && item.adult > 0">${{(item.child * 3.99 + item.adult *
+                            6.99).toFixed(2)}}</td>
+                        <td v-if="item.child > 0 && !item.adult > 0">${{(item.child * 3.99).toFixed(2)}}</td>
+                        <td v-if="!item.child > 0 && item.adult > 0">${{(item.adult * 6.99).toFixed(2)}}</td>
+                        <!-- button that calls the remove movie click method while passing it the item and its properties as well as its location at index -->
+                        <td><button class="btn btn-primary text-bg-danger" v-on:click="rmc(item, index)">Delete</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <!-- for every item in cart we will display the amount of tickets rounded to two because the total would randomly be a long decimal -->
+            <div class="totals" v-for="item in cart">
+                <!-- only displays if the amount of respective tickets is greater than 0 -->
+                <div class="childdisplay" v-if="item.child > 0">
+                    <h1>{{item.title}} Child Ticket total: ${{(item.child * 3.99).toFixed(2)}}</h1>
+                </div>
+                <div class="adultdisplay" v-if="item.adult > 0">
+                    <h1>{{item.title}} Adult Ticket total: ${{(item.adult * 6.99).toFixed(2)}}</h1>
+                </div>
+            </div>
+            <!-- calls the totalcalc computed method that calculates the total of the tickets -->
+            <div class="totaldisplay">
+                <h1 v-if="totalcalc > 0">Total: ${{totalcalc.toFixed(2)}}</h1>
+            </div>
+        </div>
+    </div>
+    <p>&copy; Tanner Ladouceur</p>
+    <script src="app.js" type="module"></script>
+</body>
+
+</html>
